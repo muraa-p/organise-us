@@ -34,6 +34,13 @@ Install deps:
 npm install
 ```
 
+Set environment variables (frontend):
+
+1. Copy `.env.example` to `.env`
+2. Fill in:
+   - `VITE_SUPABASE_URL` (or `VITE_SUPABASE_PROJECT_ID`)
+   - `VITE_SUPABASE_ANON_KEY`
+
 Run dev server:
 
 ```bash
@@ -103,7 +110,7 @@ Placeholders (these will show as broken images until you add the files):
 ## Security Notes (Important)
 
 - Never commit real secrets. This repo’s `.gitignore` ignores `.env*` files and common local artifacts.
-- If you plan to make this repository public, review `utils/supabase/info.tsx` and move configuration to environment variables before publishing.
+- This repo is safe to publish without hardcoded keys: Supabase client config is read from `VITE_*` env vars (see `.env.example`).
 - Rotate any credentials that were ever committed or shared.
 
 ## Attribution
