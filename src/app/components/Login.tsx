@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { auth } from '../lib/auth';
+import { auth, isDemoMode } from '../lib/auth';
+import { DEMO_EMAIL, DEMO_PASSWORD } from '../lib/demo';
 import { toast } from 'sonner';
-import { Users } from 'lucide-react';
+import { Users, Sparkles } from 'lucide-react';
 
 export function Login() {
   const navigate = useNavigate();
@@ -14,8 +15,19 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // /login?demo=1 jumps straight into the demo — handy for sharing a link.
+  useEffect(() => {
+    if (!isDemoMode) return;
+    if (new URLSearchParams(window.location.search).get('demo') !== '1') return;
+    (async () => {
+      try {
+        await auth.signIn(DEMO_EMAIL, DEMO_PASSWORD);
+        navigate('/dashboard');
+      } catch { /* stay on the login page */ }
+    })();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {    e.preventDefault();
     setLoading(true);
 
     try {
@@ -77,10 +89,49 @@ export function Login() {
             </form>
 
             <div className="mt-4 text-center text-sm">
-              <span className="text-slate-600">Don't have an account? </span>
-              <Link to="/signup" className="text-slate-900 hover:underline font-medium">
-                Sign up
-              </Link>
+              {isDemoMode ? (
+                <>
+                  <p className="text-slate-500 mb-3">
+                    No account needed — this deployment runs in demo mode with
+                    sample data and no database.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                    onClick={async () => {
+                      setEmail(DEMO_EMAIL);
+                      setPassword(DEMO_PASSWORD);
+                      setLoading(true);
+                      try {
+                        await auth.signIn(DEMO_EMAIL, DEMO_PASSWORD);
+                        toast.success('Welcome to the demo!');
+                        navigate('/dashboard');
+                      } catch (error: any) {
+                        toast.error(error.message || 'Could not start the demo');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Explore the demo
+                  </Button>
+                  <p className="mt-4 text-sm">
+                    <Link to="/" className="text-slate-900 hover:underline font-medium">
+                      Browse public groups instead
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="text-slate-600">Don't have an account? </span>
+                  <Link to="/signup" className="text-slate-900 hover:underline font-medium">
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

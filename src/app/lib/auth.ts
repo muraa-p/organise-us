@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { publicAnonKey, supabaseUrl } from '/utils/supabase/info';
+import { isSupabaseConfigured, publicAnonKey, supabaseUrl } from '/utils/supabase/info';
+import { demoAuth } from './demo';
 
 // Lazy initialization of Supabase client
 let supabaseInstance: any = null;
@@ -16,6 +17,9 @@ const isSessionFresh = (session: any) => {
 };
 
 const getSupabase = () => {
+  // Never construct a client without credentials: createClient('', '') throws
+  // and takes the whole app down. Demo mode never touches the network.
+  if (!isSupabaseConfigured) return null;
   if (!supabaseInstance) {
     supabaseInstance = createClient(supabaseUrl, publicAnonKey, {
       auth: {
@@ -27,7 +31,7 @@ const getSupabase = () => {
   return supabaseInstance;
 };
 
-export const auth = {
+const liveAuth = {
   async signUp(email: string, password: string, name: string) {
     const response = await fetch(`${supabaseUrl}/functions/v1/make-server-1a98deae/signup`, {
       method: 'POST',
@@ -175,4 +179,11 @@ export const auth = {
   }
 };
 
-export const supabase = getSupabase();
+export const supabase: any = getSupabase();
+
+/**
+ * Demo mode is used when no Supabase credentials are present. Both objects
+ * expose the same methods, so components never need to know which is active.
+ */
+export const auth: any = isSupabaseConfigured ? liveAuth : demoAuth;
+export const isDemoMode = !isSupabaseConfigured;

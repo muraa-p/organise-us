@@ -38,3 +38,12 @@ export const projectId =
   "";
 
 export const publicAnonKey = env.VITE_SUPABASE_ANON_KEY || "";
+
+/**
+ * True when a real Supabase project is wired up.
+ *
+ * When false the app boots into demo mode: no network calls, seeded data in
+ * localStorage, and a ready-made demo account. Set VITE_SUPABASE_URL and
+ * VITE_SUPABASE_ANON_KEY to use a live database instead — see .env.example.
+ */
+export const isSupabaseConfigured = Boolean(supabaseUrl && publicAnonKey);

@@ -1,4 +1,5 @@
-import { publicAnonKey, supabaseUrl } from '/utils/supabase/info';
+import { isSupabaseConfigured, publicAnonKey, supabaseUrl } from '/utils/supabase/info';
+import { demoApi } from './demo';
 
 const API_URL = `${supabaseUrl}/functions/v1/make-server-1a98deae`;
 
@@ -47,7 +48,9 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}, token?: str
   return data ?? {};
 }
 
-export const api = {
+export const api = isSupabaseConfigured ? liveApi : demoApi;
+
+const liveApi = {
   async getProfile(token: string) {
     return fetchAPI('/profile', {}, token);
   },

@@ -27,3 +27,5 @@ Thumbs.db
 
 # Supabase local artifacts / temp
 supabase/.temp/
+
+.vercel
