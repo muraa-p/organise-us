@@ -116,3 +116,50 @@ Placeholders (these will show as broken images until you add the files):
 ## Attribution
 
 See `ATTRIBUTIONS.md` for third-party assets and acknowledgements.
+---
+
+## Running without a database (demo mode)
+
+If no Supabase credentials are configured, the app starts in **demo mode** instead of
+crashing. Everything works offline against localStorage, with a small set of
+seeded sample events so the UI is never empty.
+
+| | |
+|---|---|
+| Live demo | <https://organise-us-three.vercel.app/login?demo=1> |
+| Email | `demo@organise.us` |
+| Password | `demo1234` |
+
+You can also just press **Explore the demo** on the login page, or open
+`/login?demo=1` to skip straight to the dashboard.
+
+### How it works
+
+- `utils/supabase/info.tsx` exports `isSupabaseConfigured`
+- `src/app/lib/demo.ts` provides a demo `auth` and `api` pair with the same
+  methods as the real ones, backed by localStorage
+- `src/app/lib/auth.ts` and `api.ts` pick between them at runtime
+
+Because both implementations expose the same interface, **no component code
+changes** when you switch modes.
+
+### Connecting your own Supabase
+
+Demo mode is a fallback, not a replacement. The database schema and Edge
+Function are untouched, so you can point this at any Supabase project:
+
+1. Copy `.env.example` to `.env`
+2. Fill in your values:
+
+   `
+   VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+   VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+   `
+
+3. Deploy the Supabase Edge Function `make-server-1a98deae` and apply the
+   SQL schema from `supabase/`
+4. Restart. `isSupabaseConfigured` becomes true and the app uses the live
+   database automatically.
+
+Sign-up, billing and the public-group endpoints stay disabled in demo mode
+because they genuinely need a server.
